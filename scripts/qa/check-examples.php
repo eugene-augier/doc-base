@@ -86,16 +86,16 @@ const REGEX_TITLE_CLEAN = '#<function>([\w_-]+)</function>#';
 $opts = getopt('p:t:o::h');
 
 if (empty($opts) || isset($opts['h'])) {
-	usage();
+    usage();
 }
 if (empty($opts['p']) || empty($opts['t'])) {
-	echo "\nInfo: Both -p (phpdoc path) and -t (temporary directory) must be set\n";
-	usage();
+    echo "\nInfo: Both -p (phpdoc path) and -t (temporary directory) must be set\n";
+    usage();
 }
 
 if (!is_dir($opts['p']) || !is_dir($opts['t'])) {
-	trigger_error('Unknown directory passed in', E_USER_WARNING);
-	usage();
+    trigger_error('Unknown directory passed in', E_USER_WARNING);
+    usage();
 }
 
 $tmpdir = $opts['t'];
@@ -103,83 +103,83 @@ $path   = $opts['p'];
 
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)) as $file) {
 
-	$filename = $file->getPathname();
-	
-	if (!$file->isFile() || pathinfo($filename, PATHINFO_EXTENSION) !== 'xml' || is_known_failure($filename)) {
-		continue;
-	}
+    $filename = $file->getPathname();
 
-	$examples = get_examples($filename);
+    if (!$file->isFile() || pathinfo($filename, PATHINFO_EXTENSION) !== 'xml' || is_known_failure($filename)) {
+        continue;
+    }
 
-	if ($examples) {
-		foreach ($examples as $example) {
-			$parsed_example = validate_example($example, "$tmpdir/phplint{$_SERVER['REQUEST_TIME']}.php");
+    $examples = get_examples($filename);
 
-			if (isset($parsed_example['error_line_num'])) {
-				$errors[] = $parsed_example;
-			}
-		}
-	}
+    if ($examples) {
+        foreach ($examples as $example) {
+            $parsed_example = validate_example($example, "$tmpdir/phplint{$_SERVER['REQUEST_TIME']}.php");
+
+            if (isset($parsed_example['error_line_num'])) {
+                $errors[] = $parsed_example;
+            }
+        }
+    }
 }
 
 if (empty($errors)) {
-	echo "No errors were found in examples!\n";
-	exit(0);
+    echo "No errors were found in examples!\n";
+    exit(0);
 } else {
-	$o = '';
-	foreach ($errors as $error) {
-		echo "Filename      : $error[filename]\n";
-		echo "Error         : $error[return]\n";
-		echo "Line number   : $error[error_line_num]\n";
-		echo "Example title : $error[title]\n";
-		echo "Example type  : $error[type]\n";
-		echo "Example num   : $error[num]\n";
-		echo "Line -1       : " . $error['error_line'][0] . "\n";
-		echo "Line          : " . $error['error_line'][1] . "\n";
-		echo "Line +1       : " . $error['error_line'][2] . "\n";
-		echo "-----------------------\n";
-		$o .= " $error[filename]";
-	}
-	if (isset($opts['o'])) {
-		if (empty($opts['o'])) {
-			if (!empty($_SERVER['EDITOR'])) {
-				$opts['o'] = $_SERVER['EDITOR'];
-			} else {
-				echo $o;
-				exit;
-			}
-		}
-		shell_exec($opts['o'] . $o);
-	}
+    $o = '';
+    foreach ($errors as $error) {
+        echo "Filename      : $error[filename]\n";
+        echo "Error         : $error[return]\n";
+        echo "Line number   : $error[error_line_num]\n";
+        echo "Example title : $error[title]\n";
+        echo "Example type  : $error[type]\n";
+        echo "Example num   : $error[num]\n";
+        echo "Line -1       : " . $error['error_line'][0] . "\n";
+        echo "Line          : " . $error['error_line'][1] . "\n";
+        echo "Line +1       : " . $error['error_line'][2] . "\n";
+        echo "-----------------------\n";
+        $o .= " $error[filename]";
+    }
+    if (isset($opts['o'])) {
+        if (empty($opts['o'])) {
+            if (!empty($_SERVER['EDITOR'])) {
+                $opts['o'] = $_SERVER['EDITOR'];
+            } else {
+                echo $o;
+                exit;
+            }
+        }
+        shell_exec($opts['o'] . $o);
+    }
 }
 
 function get_examples(string $filename): array  {
 
-	$content = file_get_contents($filename);
+    $content = file_get_contents($filename);
 
-	$info = [];
-	if ($number = preg_match_all(REGEX_EXAMPLE_FIND, $content, $matches)) {
+    $info = [];
+    if ($number = preg_match_all(REGEX_EXAMPLE_FIND, $content, $matches)) {
 
-		// Found at least one example
-		foreach ($matches[3] as $num => $example) {
+        // Found at least one example
+        foreach ($matches[3] as $num => $example) {
 
-			// Expected output as suggested by the XML
-			$expected = 'Unknown';
-			if (preg_match(REGEX_OUTPUT_FIND, $matches[4][$num], $match)) {
-				if (!empty($match[1])) {
-					$expected = $match[1];
-				}
-			}
-			// Type: example or informalexample
-			$type = trim($matches[1][$num]);
+            // Expected output as suggested by the XML
+            $expected = 'Unknown';
+            if (preg_match(REGEX_OUTPUT_FIND, $matches[4][$num], $match)) {
+                if (!empty($match[1])) {
+                    $expected = $match[1];
+                }
+            }
+            // Type: example or informalexample
+            $type = trim($matches[1][$num]);
 
-			// Title: Most <example>'s have <title>'s
-			$title = 'Unknown';
-			if (!empty($matches[2][$num])) {
-				$title = preg_replace(REGEX_TITLE_CLEAN, '\1()', $matches[2][$num]);
-			}
+            // Title: Most <example>'s have <title>'s
+            $title = 'Unknown';
+            if (!empty($matches[2][$num])) {
+                $title = preg_replace(REGEX_TITLE_CLEAN, '\1()', $matches[2][$num]);
+            }
 
-			$info[] = [
+            $info[] = [
                 'title' 	=> trim(str_replace("\n", '', $title)),
                 'filename'	=> trim($filename),
                 'example'	=> trim($example),
@@ -187,57 +187,57 @@ function get_examples(string $filename): array  {
                 'type'		=> trim($type),
                 'num'		=> (int) $num + 1,
             ];
-		}
-	}
+        }
+    }
 
-	return $info;
+    return $info;
 }
 
 function validate_example ($info, $filename) {
 
-	if (!file_exists($filename) && !touch($filename)) {
-		trigger_error("Could not create file $filename for lint checking", E_USER_ERROR);
-	}
-	file_put_contents($filename, $info['example']);
+    if (!file_exists($filename) && !touch($filename)) {
+        trigger_error("Could not create file $filename for lint checking", E_USER_ERROR);
+    }
+    file_put_contents($filename, $info['example']);
 
-	exec("php -l {$filename} 2>&1", $out, $return);
+    exec("php -l {$filename} 2>&1", $out, $return);
 
-	$fq  = preg_quote($filename);
-	
-	$info['return'] = trim(preg_replace(array("@(in $fq.*)@", "@Errors parsing $fq@"), '', $out[0]));
+    $fq  = preg_quote($filename);
 
-	// Has it always been "No syntax errors detected"? Let's assume so for now
-	if (!str_contains($info['return'], 'No syntax errors detected')) {
-		$parts = explode("\n", $info['example']);
-		
-		$error_line_num = (int) trim(substr($out[0], strpos($out[0], 'on line')+8));
+    $info['return'] = trim(preg_replace(array("@(in $fq.*)@", "@Errors parsing $fq@"), '', $out[0]));
 
-		$info['error_line_num'] = $error_line_num;
-		$info['error_line'][0]  = trim($parts[($error_line_num-1)]);
-		$info['error_line'][1]  = trim($parts[$error_line_num]);
+    // Has it always been "No syntax errors detected"? Let's assume so for now
+    if (!str_contains($info['return'], 'No syntax errors detected')) {
+        $parts = explode("\n", $info['example']);
 
-		if (isset($parts[($error_line_num+1)])) {
-			$info['error_line'][2] = trim($parts[($error_line_num+1)]);
-		} else {
-			$info['error_line'][2] = 'None';
-		}
-	}
-	return $info;
+        $error_line_num = (int) trim(substr($out[0], strpos($out[0], 'on line')+8));
+
+        $info['error_line_num'] = $error_line_num;
+        $info['error_line'][0]  = trim($parts[($error_line_num-1)]);
+        $info['error_line'][1]  = trim($parts[$error_line_num]);
+
+        if (isset($parts[($error_line_num+1)])) {
+            $info['error_line'][2] = trim($parts[($error_line_num+1)]);
+        } else {
+            $info['error_line'][2] = 'None';
+        }
+    }
+    return $info;
 }
 
 function is_known_failure(string $filename): bool {
-	foreach (KNOWN_FILE_FAILURES as $fail) {
-		if (str_contains($filename, $fail)) {
-			return true;
-		}
-	}
-	return false;
+    foreach (KNOWN_FILE_FAILURES as $fail) {
+        if (str_contains($filename, $fail)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function usage() {
-	echo "\n------ DocBook Lint Checker ------\n";
-	echo "Usage:   php {$_SERVER['argv'][0]} -p /path/to/php/doc/cvs -t /path/to/tmp/dir\n";
-	echo "Example: php {$_SERVER['argv'][0]} -p /cvs/phpdoc/en -t /tmp\n";
-	echo "Optional: -o to load files in EDITOR (" . $_SERVER['EDITOR'] . ") or -o /path/to/editor\n";
-	exit;
+    echo "\n------ DocBook Lint Checker ------\n";
+    echo "Usage:   php {$_SERVER['argv'][0]} -p /path/to/php/doc/cvs -t /path/to/tmp/dir\n";
+    echo "Example: php {$_SERVER['argv'][0]} -p /cvs/phpdoc/en -t /tmp\n";
+    echo "Optional: -o to load files in EDITOR (" . $_SERVER['EDITOR'] . ") or -o /path/to/editor\n";
+    exit;
 }

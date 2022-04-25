@@ -10,6 +10,7 @@ class Tokenizer implements TokenizerInterface
     private int $nbChars;
     private int $cursor = 0;
     private int $line = 1;
+    /** @var array<int, Token> $tokens */
     private array $tokens = [];
     private bool $skipUnknown = true;
 
@@ -27,7 +28,6 @@ class Tokenizer implements TokenizerInterface
             return null;
         }
 
-        /** @var Token $token */
         foreach ($this->getTokens() as $token) {
             if (!preg_match('/'.$token->getRegex().'/', $this->src, $matches)) {
                 continue;

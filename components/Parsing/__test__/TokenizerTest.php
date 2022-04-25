@@ -111,6 +111,16 @@ EOD);
         $this->assertSame($tokenizer->getLine(), $token->getEndLine());
         $this->assertSame($tokenizer->getCursor(), $tokenizer->getNbChars());
         $this->assertEmpty($tokenizer->getSrc(), 'test src is consumed');
+
+        $tokenizer = new Tokenizer('bar');
+        $this->assertSame(null, $tokenizer->getNextToken());
+
+        $tokenizer->setSrc("I LOVE PHP");
+        $tokenizer->addToken('bar', 'I LOVE');
+        $tokenizer->addToken('bar', 'PHP');
+
+        $tokenizer->getNextToken();
+        $this->assertSame('bar', $token->getType());
     }
 
     public function testSkipTokens()

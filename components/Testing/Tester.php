@@ -3,7 +3,6 @@
 namespace PHPDoc\Internal\Testing;
 
 use Exception;
-use JetBrains\PhpStorm\ArrayShape;
 use PHPDoc\Internal\Testing\Loader\TestLoaderInterface;
 use ReflectionClass;
 use RuntimeException;
@@ -28,14 +27,7 @@ class Tester
      * @throws Exception
      * @return array provides information about the test process
      */
-    #[ArrayShape([
-        'nb_passed_test' => "int",
-        'errors' => "array",
-        'nb_failed_assertion' => "int",
-        'nb_passed_assertion' => "int",
-        'nb_skipped' => "int",
-        'nb_failed_test' => "int"
-    ])] public function test(): array {
+    public function test(): array {
         $report = [
             'nb_passed_test' => 0,
             'errors' => [],

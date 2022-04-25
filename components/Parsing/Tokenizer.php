@@ -36,14 +36,19 @@ class Tokenizer implements TokenizerInterface
                 continue;
             }
 
-            $token->setText($matches[0]);
-            $token->setStartLine($this->line);
+            $start = $this->line;
             $this->line += substr_count($matches[0], "\n");
-            $token->setEndLine($this->line);
-
             $this->updateSrc(strlen($matches[0]));
 
-            return $token->toSkip() ? $this->getNextToken() : $token;
+            if ($token->toSkip()) {
+                return $this->getNextToken();
+            }
+
+            $token->setStartLine($start);
+            $token->setEndLine($this->line);
+            $token->setText($matches[0]);
+
+            return $token;
         }
 
         if (!$this->skipUnknown) {

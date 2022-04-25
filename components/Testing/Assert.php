@@ -4,7 +4,7 @@ namespace PHPDoc\Internal\Testing;
 
 use InvalidArgumentException;
 use PHPDoc\Internal\IO\Style;
-use PHPDoc\Internal\String\Conv;
+use PHPDoc\Internal\String\Dumper;
 use PHPDoc\Internal\String\Writer;
 
 class Assert implements AssertInterface
@@ -111,8 +111,8 @@ class Assert implements AssertInterface
             $writer->writePair('about', $metadata['user_message']);
         }
 
-        $writer->writePair('given', Style::error(Conv::toString($given)))
-            ->writePair($metadata['reason'], Style::success(Conv::toString($expected)))
+        $writer->writePair('given', Style::error(Dumper::dump($given)))
+            ->writePair($metadata['reason'], Style::success(Dumper::dump($expected)))
             ->cr();
 
         $this->failures[] = $writer->text();

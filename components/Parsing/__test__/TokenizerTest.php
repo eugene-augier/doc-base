@@ -1,5 +1,6 @@
 <?php
 
+use PHPDoc\Internal\Parsing\Exception\UnexpectedTokenException;
 use PHPDoc\Internal\Parsing\Token;
 use PHPDoc\Internal\Parsing\Tokenizer;
 use PHPDoc\Internal\Testing\Assert;
@@ -11,6 +12,10 @@ class TokenizerTest extends Assert
     const STRING = 'string';
     const SINGLE_LINE_HASH = '#_comments_on_single_line';
     const MULTI_LINE_FOR_SINGLE_LINE = 'multiple_line_comments_on_single_line';
+
+    const STRING_REGEX = '^\"[^\".]*\"';
+    const WHITE_SPACE_REGEX = '^ +';
+    const CR_REGEX = '^\n';
 
     const TOKENS = [
         self::WHITE_SPACE => [
@@ -89,51 +94,102 @@ class TokenizerTest extends Assert
 
     public function testTokenize()
     {
-        $tokenizer = new Tokenizer('bar');
-        $this->assertSame(null, $tokenizer->getNextToken());
-
-        $tokenizer->setSrc(<<<'EOD'
+        $tokenizer = new Tokenizer();
+        $tokenizer->setSrc($src = <<<'EOD'
 "1
 2
 3"
 EOD);
-        $tokenizer->addToken(self::STRING, self::TOKENS[self::STRING][0], ['message' => self::TOKENS[self::STRING][1]]);
+        $tokenizer->addToken('string', self::STRING_REGEX, ['foo' => 'bar']);
 
         $token = $tokenizer->getNextToken();
-        $this->assertSame(self::STRING, $token->getType());
-        $this->assertSame(self::TOKENS[self::STRING][0], $token->getRegex());
-        $this->assertSame(['message' => self::TOKENS[self::STRING][1]], $token->getMetadata());
+        $this->assertSame($src, $token->getText());
+        $this->assertSame('string', $token->getType());
+        $this->assertSame(self::STRING_REGEX, $token->getRegex());
+        $this->assertSame(['foo' => 'bar'], $token->getMetadata());
         $this->assertFalse($token->toSkip());
+
         $this->assertSame(1, $token->getStartLine());
         $this->assertSame(3, $token->getEndLine());
 
         $this->assertNull($tokenizer->getNextToken());
+        $this->assertEmpty($tokenizer->getSrc(), 'test src is consumed');
         $this->assertSame($tokenizer->getLine(), $token->getEndLine());
         $this->assertSame($tokenizer->getCursor(), $tokenizer->getNbChars());
-        $this->assertEmpty($tokenizer->getSrc(), 'test src is consumed');
 
-        $tokenizer = new Tokenizer('bar');
-        $this->assertSame(null, $tokenizer->getNextToken());
-
+        $tokenizer = new Tokenizer();
         $tokenizer->setSrc("I LOVE PHP");
         $tokenizer->addToken('bar', 'I LOVE');
-        $tokenizer->addToken('bar', 'PHP');
+        $tokenizer->addToken('foo', 'PHP');
 
-        $tokenizer->getNextToken();
-        $this->assertSame('bar', $token->getType());
+        $this->assertSame('I LOVE', $tokenizer->getNextToken()->getText());
+        $this->assertSame('PHP', $tokenizer->getNextToken()->getText());
+    }
+
+    public function testSkipUnknownByDefault()
+    {
+        $tokenizer = new Tokenizer();
+        $tokenizer->setSrc(<<<'EOD'
+should be skipped ù%sd
+"hello"
+EOD);
+        $tokenizer->addToken('string', self::STRING_REGEX);
+
+        $token = $tokenizer->getNextToken();
+        $this->assertSame('string', $token->getType());
+        $this->assertSame('"hello"', $token->getText());
+    }
+
+    public function testDontSkipUnknown()
+    {
+        $tokenizer = new Tokenizer();
+        $tokenizer->setSkipUnknown(false);
+        $tokenizer->setSrc(<<<'EOD'
+$
+"hello"
+EOD);
+        $tokenizer->addToken('string', self::STRING_REGEX);
+
+        try {
+            $tokenizer->getNextToken();
+        } catch (Exception $e) {
+            $this->assertInstanceOf($e, UnexpectedTokenException::class);
+            $this->assertSame(
+                $e->getMessage(),
+                'Unexpected token "$". Set PHPDoc\Internal\Parsing\Tokenizer::skipUnknown to true if you want skip all the unknown token'
+            );
+        }
     }
 
     public function testSkipTokens()
     {
-        $tokenizer = new Tokenizer(<<<'EOD'
-"skipped string" "also skipped" ""
-EOD);
-        $tokenizer->addSkipToken(self::STRING, self::TOKENS[self::STRING][0], ['message' => self::TOKENS[self::STRING][1]]);
-        $tokenizer->addToken(self::WHITE_SPACE, self::TOKENS[self::WHITE_SPACE][0], ['message' => self::TOKENS[self::WHITE_SPACE][1]]);
+        $tokenizer = new Tokenizer('"skipped string" "also skipped" ""');
+        $tokenizer->addSkipToken('string', self::STRING_REGEX);
+        $tokenizer->addToken('white_space', self::WHITE_SPACE_REGEX);
 
-        $this->assertSame(2, count($tokenizer->getTokens()),'test tokens count');
-        $this->assertSame(self::WHITE_SPACE, $tokenizer->getNextToken()->getType(),'test string token is skipped and give white space');
-        $this->assertSame(self::WHITE_SPACE, $tokenizer->getNextToken()->getType(),'test string token is skipped and give white space');
+        $token = $tokenizer->getNextToken();
+        $this->assertSame(strlen('"skipped string" '), $tokenizer->getCursor());
+        $this->assertSame('white_space', $token->getType());
+        $this->assertSame(' ', $token->getText());
+
+        $token = $tokenizer->getNextToken();
+        $this->assertSame('white_space', $token->getType());
+        $this->assertSame(strlen('"skipped string" "also skipped" '), $tokenizer->getCursor());
+        $this->assertSame(' ', $token->getText());
         $this->assertNull($tokenizer->getNextToken(),'test no more tokens');
+    }
+
+    public function testTokenPriority()
+    {
+        $tokenizer = new Tokenizer();
+        $tokenizer->setSrc(<<<'EOD'
+
+"hello"
+EOD);
+        $tokenizer->addToken('string', self::STRING_REGEX);
+        $tokenizer->addToken('eol', self::CR_REGEX);
+
+        $token = $tokenizer->getNextToken();
+        $this->assertSame('eol', $token->getType());
     }
 }

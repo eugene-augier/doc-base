@@ -6,6 +6,7 @@ class Token
 {
     private string $type;
     private string $regex;
+    private string $text = '';
     private array $metadata;
     private int $startLine = 1;
     private int $endLine = 1;
@@ -38,6 +39,17 @@ class Token
     public function setRegex(string $regex): self
     {
         $this->regex = $regex;
+        return $this;
+    }
+
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
+    public function setText(string $text): Token
+    {
+        $this->text = $text;
         return $this;
     }
 

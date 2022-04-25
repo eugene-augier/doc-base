@@ -4,12 +4,18 @@ namespace PHPDoc\Internal\String;
 
 use InvalidArgumentException;
 
-class Conv
+class Dumper
 {
-    public static function toString($item, int $tab = 0): string
+    public static function dump($item): string
+    {
+        return static::toString($item);
+    }
+
+    private static function toString($item, int $tab = 0): string
     {
         return match (gettype($item)) {
-            'string', 'integer', 'double' => $item,
+            'string' => '"'.$item.'"',
+            'integer', 'double' => $item,
             'NULL' => 'NULL',
             'boolean' => $item ? 'true' : 'false',
             'array' => static::arrayToString($item, $tab + 2),

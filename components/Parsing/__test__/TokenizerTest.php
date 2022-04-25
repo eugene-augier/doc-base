@@ -94,8 +94,7 @@ EOD);
 
     public function testSkipUnknownByDefault()
     {
-        $tokenizer = new Tokenizer();
-        $tokenizer->setSrc(<<<'EOD'
+        $tokenizer = new Tokenizer(<<<'EOD'
 should be skipped ù%sd
 "hello"
 EOD);

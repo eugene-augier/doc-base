@@ -17,33 +17,6 @@ class TokenizerTest extends Assert
     const WHITE_SPACE_REGEX = '^ +';
     const CR_REGEX = '^\n';
 
-    const TOKENS = [
-        self::WHITE_SPACE => [
-            '^ +',
-            'SKIP'
-        ],
-
-        self::END_OF_LINE => [
-            '^\n',
-            'SKIP'
-        ],
-
-        self::STRING => [
-            '^\"[^\".]*\"',
-            'SKIP'
-        ],
-
-        self::SINGLE_LINE_HASH => [
-            '^\#.*',
-            '"#" must be replaced by "//" for Single-line comments'
-        ],
-
-        self::MULTI_LINE_FOR_SINGLE_LINE => [
-            '^\/\*(.*)\*\/',
-            'Use of multiline comments for Single-line comment is forbidden, it must be replaced by "//"'
-        ],
-    ];
-
     public function testSrc()
     {
         $tokenizer = new Tokenizer('foo');

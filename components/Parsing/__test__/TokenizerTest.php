@@ -7,12 +7,6 @@ use PHPDoc\Internal\Testing\Assert;
 
 class TokenizerTest extends Assert
 {
-    const WHITE_SPACE = 'white_spaces';
-    const END_OF_LINE = 'end_of_line';
-    const STRING = 'string';
-    const SINGLE_LINE_HASH = '#_comments_on_single_line';
-    const MULTI_LINE_FOR_SINGLE_LINE = 'multiple_line_comments_on_single_line';
-
     const STRING_REGEX = '^\"[^\".]*\"';
     const WHITE_SPACE_REGEX = '^ +';
     const CR_REGEX = '^\n';

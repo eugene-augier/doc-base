@@ -106,7 +106,20 @@ class Assert implements AssertInterface
 
     private function storeFailureMessage($expected, $given, array $metadata): void
     {
+        $traceInfo = [];
+        foreach (debug_backtrace() as $trace) {
+            if ($trace['file'] && str_contains($trace['file'], '__test__')) {
+                $traceInfo = $trace;
+                break;
+            }
+        }
+
         $writer = new Writer();
+        if ($traceInfo) {
+            $writer->writePair('file', $traceInfo['file']);
+            $writer->writePair('line', $traceInfo['line']);
+        }
+
         if ($metadata['user_message']) {
             $writer->writePair('about', $metadata['user_message']);
         }

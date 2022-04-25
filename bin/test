@@ -53,8 +53,6 @@ if (empty($report['errors'])) {
         foreach ($error['failures'] as $failure) {
             $writer
                 ->writePair('test', $error['test'], false)
-                ->writePair('file', $error['file'])
-                ->writePair('line', $error['line'])
                 ->write($failure)
                 ->cr()
             ;

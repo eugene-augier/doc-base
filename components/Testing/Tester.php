@@ -82,8 +82,6 @@ class Tester
                 // we only want register the failures from the current testMethod
                 if ($failures = $instance->getLastFailures()) {
                     $report['errors'][] = [
-                        'line' => $method->getStartLine(),
-                        'file' => $realPath,
                         'test' => $method->name,
                         'failures' => $failures
                     ];

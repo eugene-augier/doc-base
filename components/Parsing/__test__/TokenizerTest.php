@@ -126,8 +126,4 @@ EOD);
         $this->assertSame(self::WHITE_SPACE, $tokenizer->getNextToken()->getType(),'test string token is skipped and give white space');
         $this->assertNull($tokenizer->getNextToken(),'test no more tokens');
     }
-
-    public function skipThisTest()
-    {
-    }
 }

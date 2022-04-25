@@ -61,8 +61,7 @@ class TokenizerTest extends Assert
 
     public function testTokenize()
     {
-        $tokenizer = new Tokenizer();
-        $tokenizer->setSrc($src = <<<'EOD'
+        $tokenizer = new Tokenizer($src = <<<'EOD'
 "1
 2
 3"

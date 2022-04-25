@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use PHPDoc\Internal\IO\Style;
 use PHPDoc\Internal\String\Dumper;
 use PHPDoc\Internal\String\Writer;
+use PHPDoc\Internal\Testing\Loader\TestLoaderInterface;
 
 class Assert implements AssertInterface
 {
@@ -108,7 +109,7 @@ class Assert implements AssertInterface
     {
         $traceInfo = [];
         foreach (debug_backtrace() as $trace) {
-            if ($trace['file'] && str_contains($trace['file'], '__test__')) {
+            if ($trace['file'] && str_contains($trace['file'], TestLoaderInterface::TEST_DIR_NAME)) {
                 $traceInfo = $trace;
                 break;
             }

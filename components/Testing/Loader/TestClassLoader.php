@@ -8,16 +8,15 @@ use SplFileInfo;
 
 class TestClassLoader implements TestLoaderInterface
 {
+    private array $excludes = [];
     private array $accepted = [];
     private array $resources = [];
     private string $root;
-    private string $testDirName;
     private string $testClassSuffix;
 
-    public function __construct(string $root, string $testDirName, string $testClassSuffix)
+    public function __construct(string $root, string $testClassSuffix)
     {
         $this->setRoot($root);
-        $this->setTestDirName($testDirName);
         $this->setTestClassSuffix($testClassSuffix);
     }
 
@@ -43,15 +42,6 @@ class TestClassLoader implements TestLoaderInterface
     }
 
     /**
-     * Where all the files must be stored
-     */
-    protected function setTestDirName(string $testDirName): self
-    {
-        $this->testDirName = trim($testDirName, '/');
-        return $this;
-    }
-
-    /**
      * Will load files only in specified directories under the root dir
      */
     public function onlyIn(array $accepted): void
@@ -67,6 +57,16 @@ class TestClassLoader implements TestLoaderInterface
     public function only(string $file): void
     {
         $this->accepted = [$file];
+    }
+
+    /**
+     * All the files under these directories will be ignored
+     */
+    public function excludes(array $dirs): void
+    {
+        foreach ($dirs as $dir) {
+            $this->excludes[] = '/'.trim($dir, '/').'/';
+        }
     }
 
     /**
@@ -108,7 +108,7 @@ class TestClassLoader implements TestLoaderInterface
 
     public function isValidFile(string $file): bool
     {
-        return file_exists($file) && $this->isInvalidDir($file) && $this->hasValidSuffix($file);
+        return file_exists($file) && !$this->isInvalidDir($file) && $this->hasValidSuffix($file);
     }
 
     public function hasValidSuffix(string $file): bool
@@ -122,7 +122,14 @@ class TestClassLoader implements TestLoaderInterface
 
     public function isInvalidDir(string $dir): bool
     {
-        return str_contains($dir, $this->testDirName);
+        $dir = '/'.trim($dir, '/').'/';
+        foreach ($this->excludes as $exclude) {
+            if (str_contains($dir, $exclude)) {
+                return true;
+            }
+        }
+
+        return !str_contains($dir, self::TEST_DIR_NAME);
     }
 
     private function addResource(string $realpath): void

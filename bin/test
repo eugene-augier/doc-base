@@ -62,4 +62,5 @@ if (empty($report['errors'])) {
     }
 
     $writer->writeLine(Style::error($report['nb_failed_assertion'].' assertion(s) failed...'))->echo();
+    exit(1);
 }

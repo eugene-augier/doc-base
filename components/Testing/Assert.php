@@ -68,7 +68,7 @@ class Assert implements AssertInterface
 
     protected function assertOfType($expected, $given, string $message = ''): void
     {
-        $this->assertIs($expected, gettype($given), $message);
+        $this->assertIs($expected, get_debug_type($given), $message);
     }
 
     protected function assertInstanceOf(object $given, $expected, string $message = ''): void

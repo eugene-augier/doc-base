@@ -43,7 +43,7 @@ if (empty($report['errors'])) {
     }
 
     if ($report['nb_passed_test'] > 0) {
-        Printer::printSuccess(sprintf('%d test(s), %d assertion(s) passed!', $report['nb_passed_test'], $report['nb_passed_assertion']));
+        Printer::printBgSuccess(sprintf('%d test(s), %d assertion(s) passed!', $report['nb_passed_test'], $report['nb_passed_assertion']));
     } else {
         Printer::printWarning('No errors were found because no tests were performed.');
     }
@@ -59,6 +59,6 @@ if (empty($report['errors'])) {
         }
     }
 
-    $writer->writeLine(Style::error($report['nb_failed_assertion'].' assertion(s) failed...'))->echo();
+    $writer->writeLine(Style::bgError($report['nb_failed_assertion'].' assertion(s) failed...'))->echo();
     exit(1);
 }

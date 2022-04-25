@@ -95,7 +95,7 @@ EOD);
     public function testSkipUnknownByDefault()
     {
         $tokenizer = new Tokenizer(<<<'EOD'
-should be skipped ù%sd
+should be skipped
 "hello"
 EOD);
         $tokenizer->addToken('string', self::STRING_REGEX);
@@ -129,6 +129,7 @@ EOD);
     public function testSkipTokens()
     {
         $tokenizer = new Tokenizer('"skipped string" "also skipped" ""');
+        $tokenizer->setSkipUnknown(false);
         $tokenizer->addSkipToken('string', self::STRING_REGEX);
         $tokenizer->addToken('white_space', self::WHITE_SPACE_REGEX);
 
@@ -153,8 +154,6 @@ EOD);
 EOD);
         $tokenizer->addToken('string', self::STRING_REGEX);
         $tokenizer->addToken('eol', self::CR_REGEX);
-
-        $token = $tokenizer->getNextToken();
-        $this->assertSame('eol', $token->getType());
+        $this->assertSame('eol', $tokenizer->getNextToken()->getType());
     }
 }

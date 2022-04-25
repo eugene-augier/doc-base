@@ -13,13 +13,13 @@ class Dumper
 
     private static function toString($item, int $tab = 0): string
     {
-        return match (gettype($item)) {
+        return match (get_debug_type($item)) {
             'string' => '"'.$item.'"',
-            'integer', 'double' => $item,
-            'NULL' => 'NULL',
+            'int', 'float' => $item,
+            'null' => 'null',
             'boolean' => $item ? 'true' : 'false',
             'array' => static::arrayToString($item, $tab + 2),
-            'object' => "Object ".$item::class,
+            $item::class => "Class instance: ".$item::class,
             default => throw new InvalidArgumentException(sprintf('Use of invalid type "%s"', $item)),
         };
     }

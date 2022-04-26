@@ -1,17 +1,39 @@
 <?php
 
-use PHPDoc\Internal\String\Writer;
+use PHPDoc\Internal\String\Dumper;
 use PHPDoc\Internal\Testing\Assert;
 
 class DumperTest extends Assert
 {
-    public function testWrite()
+    public function testDump()
     {
-        $this->assertEmpty((new Writer())->text());
-        $this->assertSame("\n", (new Writer())->cr()->text());
-        $this->assertSame('foo', (new Writer())->write('foo')->text());
-        $this->assertSame("\nfoo", (new Writer())->writeLine('foo')->text());
-        $this->assertSame("\nfoo: bar", (new Writer())->writePair('foo', 'bar')->text());
-        $this->assertSame("foo: bar", (new Writer())->writePair('foo', 'bar', false)->text());
+        $this->assertSame('"foo"', Dumper::dump('foo'));
+        $this->assertSame('true', Dumper::dump(true));
+        $this->assertSame('false', Dumper::dump(false));
+        $this->assertSame('null', Dumper::dump(null));
+        $this->assertSame('1', Dumper::dump(1));
+        $this->assertSame('1.1', Dumper::dump(1.1));
+        $this->assertSame('Object: DumperTest', Dumper::dump($this));
+
+        $this->assertSame(<<<'EOD'
+[
+]
+EOD, Dumper::dump([]));
+
+//        var_dump(Dumper::dump(['foo' => ['bar' => 1], true, false, null, 1.1, $this]));die;
+        $this->assertSame(<<<'EOD'
+[
+  foo: [
+      bar: [
+          baz: 1
+        ]
+      0: true
+      1: false
+      2: null
+      3: 1.1
+      4: Object: DumperTest
+    ]
+]
+EOD, Dumper::dump(['foo' => ['bar' => ['baz' => 1], true, false, null, 1.1, $this]]));
     }
 }

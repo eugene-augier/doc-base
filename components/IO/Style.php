@@ -27,12 +27,10 @@ class Style
 
     public static function apply(string $str): string
     {
-        $str = preg_replace_callback('/<fc:(s|i|w|e|bgs|bgi|bgw|bge)>((?:(?!<).)+)+<\/fc>/', function ($matches) {
+        return preg_replace_callback('/<fc:(s|i|w|e|bgs|bgi|bgw|bge)>((?:(?!<).)+)+<\/fc>/', function ($matches) {
             [,$color, $text] = $matches;
             return sprintf(static::PRINTER_MASK, static::AVAILABLE_COLOR[$color], $text);
         }, $str);
-
-        return $str;
     }
 
     public static function success(string $message): string

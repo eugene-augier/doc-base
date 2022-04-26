@@ -124,7 +124,7 @@ class TestClassLoader implements TestLoaderInterface
 
     public function isValidFile(string $file): bool
     {
-        return file_exists($file) && $this->isValidDir($file) && $this->hasValidSuffix($file);
+        return file_exists($file) && $this->isValidPath($file) && $this->hasValidSuffix($file);
     }
 
     public function hasValidSuffix(string $file): bool
@@ -136,13 +136,16 @@ class TestClassLoader implements TestLoaderInterface
         return str_ends_with($file, $this->testClassSuffix);
     }
 
-    public function isValidDir(string $dir): bool
+    public function isValidPath(string $dir): bool
     {
         $dir = '/'.trim($dir, '/').'/';
 
         // important to avoid relative access to invalid directories: '/in-valid/../in-not-valid'
         $dir = str_replace($this->testDirName.'../', '', $dir);
         foreach ($this->excludes as $exclude) {
+            // Same but for opposite reasons
+            $dir = str_replace($exclude.'..', '', $dir);
+
             if (str_contains($dir, $exclude)) {
                 return false;
             }

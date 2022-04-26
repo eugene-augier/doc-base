@@ -43,6 +43,29 @@ class TestClassLoaderTest extends Assert
         $this->assertSame($class, 'SampleTest');
     }
 
+    public function testIsValidPath()
+    {
+        $loader = $this->createLoader();
+        $loader->setTestDirName('foo');
+
+        foreach (['foo', '/foo', 'foo/', '/foo/', 'bar/foo', 'foo/bar'] as $testDir) {
+            $this->assertTrue($loader->isValidPath($testDir));
+        }
+
+        foreach (['foo/..', 'foo/../', 'foo/../foo/../', 'bar/foo/../foo/../bar'] as $testDir) {
+            $this->assertFalse($loader->isValidPath($testDir));
+        }
+
+        $loader->excludes(['bar']);
+        $this->assertFalse($loader->isValidPath('foo/bar/'));
+        $this->assertFalse($loader->isValidPath('exclude'));
+
+
+        foreach (['foo/bar/..', 'foo/bar/../', 'foo/bar/../bar/../'] as $testDir) {
+            $this->assertTrue($loader->isValidPath($testDir));
+        }
+    }
+
     public function testFileValidity()
     {
         $loader = $this->createLoader();
@@ -55,13 +78,20 @@ class TestClassLoaderTest extends Assert
         $this->assertTrue($loader->isValidFile(__DIR__.'/fixtures/__special_test__/FakeClassTest.php'));
     }
 
-    public function testAvoidRelativeFileValidity()
+    public function testRelativeFileAccess()
     {
         $loader = $this->createLoader();
         $this->assertTrue(file_exists(__DIR__.'/fixtures/a/__special_test__/../NotIn_test_DirectoryTest.php'));
         $this->assertTrue(file_exists(__DIR__.'/fixtures/a/__special_test__/../__special_test__/../NotIn_test_DirectoryTest.php'));
         $this->assertFalse($loader->isValidFile(__DIR__.'/fixtures/a/__special_test__/../NotIn_test_DirectoryTest.php'));
         $this->assertFalse($loader->isValidFile(__DIR__.'/fixtures/a/__special_test__/../__special_test__/../NotIn_test_DirectoryTest.php'));
+
+        $loader->excludes(['exclude']);
+
+        $this->assertTrue(file_exists(__DIR__.'/fixtures/__special_test__/exclude/../FakeClassTest.php'));
+        $this->assertTrue(file_exists(__DIR__.'/fixtures/__special_test__/exclude/../exclude/../FakeClassTest.php'));
+        $this->assertTrue($loader->isValidFile(__DIR__.'/fixtures/__special_test__/exclude/../FakeClassTest.php'));
+        $this->assertTrue($loader->isValidFile(__DIR__.'/fixtures/__special_test__/exclude/../exclude/../FakeClassTest.php'));
     }
 
     private function createLoader(): TestClassLoader

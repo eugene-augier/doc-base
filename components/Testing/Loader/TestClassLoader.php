@@ -8,6 +8,7 @@ use SplFileInfo;
 
 class TestClassLoader implements TestLoaderInterface
 {
+    private string $testDirName = '/__test__/';
     private array $excludes = [];
     private array $accepted = [];
     private array $resources = [];
@@ -23,22 +24,37 @@ class TestClassLoader implements TestLoaderInterface
     /**
      * Set root directory where files will be loaded
      */
-    public function setRoot(string $root): void
+    private function setRoot(string $root): void
     {
         $this->root = rtrim(trim($root), '/').'/';
     }
 
     /**
+     * Get directory name where files can be loaded
+     */
+    public function getTestDirName(): string
+    {
+        return $this->testDirName;
+    }
+
+    /**
+     * Set directory name where files can be loaded
+     */
+    public function setTestDirName(string $dir): void
+    {
+        $this->testDirName = '/'.trim($dir, '/').'/';
+    }
+
+    /**
      * Suffix of loaded files
      */
-    public function setTestClassSuffix(string $testClassSuffix): self
+    private function setTestClassSuffix(string $testClassSuffix): void
     {
         $this->testClassSuffix = trim($testClassSuffix, '/');
         if (!str_ends_with($testClassSuffix, '.php')) {
             $this->testClassSuffix .= '.php';
         }
 
-        return $this;
     }
 
     /**
@@ -52,9 +68,9 @@ class TestClassLoader implements TestLoaderInterface
     }
 
     /**
-     * Will load only one file
+     * Will load only one file (ignore $root)
      */
-    public function only(string $file): void
+    public function loadFile(string $file): void
     {
         $this->accepted = [$file];
     }
@@ -108,7 +124,7 @@ class TestClassLoader implements TestLoaderInterface
 
     public function isValidFile(string $file): bool
     {
-        return file_exists($file) && !$this->isInvalidDir($file) && $this->hasValidSuffix($file);
+        return file_exists($file) && $this->isValidDir($file) && $this->hasValidSuffix($file);
     }
 
     public function hasValidSuffix(string $file): bool
@@ -120,16 +136,19 @@ class TestClassLoader implements TestLoaderInterface
         return str_ends_with($file, $this->testClassSuffix);
     }
 
-    public function isInvalidDir(string $dir): bool
+    public function isValidDir(string $dir): bool
     {
         $dir = '/'.trim($dir, '/').'/';
+
+        // important to avoid relative access to invalid directories: '/in-valid/../in-not-valid'
+        $dir = str_replace($this->testDirName.'../', '', $dir);
         foreach ($this->excludes as $exclude) {
             if (str_contains($dir, $exclude)) {
-                return true;
+                return false;
             }
         }
 
-        return !str_contains($dir, self::TEST_DIR_NAME);
+        return str_contains($dir, $this->testDirName);
     }
 
     private function addResource(string $realpath): void

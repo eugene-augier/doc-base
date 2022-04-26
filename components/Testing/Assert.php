@@ -6,13 +6,18 @@ use InvalidArgumentException;
 use PHPDoc\Internal\IO\Style;
 use PHPDoc\Internal\String\Dumper;
 use PHPDoc\Internal\String\Writer;
-use PHPDoc\Internal\Testing\Loader\TestLoaderInterface;
 
 class Assert implements AssertInterface
 {
     private array $failures = [];
     private array $lastFailures = [];
     private int $countPassedAssertions = 0;
+    private string $validTestDir;
+
+    public function __construct(string $validTestDir)
+    {
+        $this->validTestDir = $validTestDir;
+    }
 
     public function countPassedAssertions(): int
     {
@@ -109,7 +114,7 @@ class Assert implements AssertInterface
     {
         $traceInfo = [];
         foreach (debug_backtrace() as $trace) {
-            if ($trace['file'] && str_contains($trace['file'], TestLoaderInterface::TEST_DIR_NAME)) {
+            if ($trace['file'] && str_contains($trace['file'], $this->validTestDir)) {
                 $traceInfo = $trace;
                 break;
             }

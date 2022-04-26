@@ -51,7 +51,7 @@ class Tester
                 ));
             }
 
-            $instance = $r->newInstanceWithoutConstructor();
+            $instance = $r->newInstance($this->loader->getTestDirName());
             foreach ($r->getMethods() as $method) {
                 // start to check parent class methods
                 if ($method->class !== $class) {

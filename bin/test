@@ -17,7 +17,7 @@ if (isset($argv[1])) {
     if (is_dir($argv[1])) {
         $loader->onlyIn([$argv[1]]);
     } else if ($loader->isValidFile($argv[1])) {
-        $loader->only($argv[1]);
+        $loader->loadFile($argv[1]);
 
         if (isset($argv[2]) && str_starts_with($argv[2], 'test')) {
             $tester->setTestMethod($argv[2]);

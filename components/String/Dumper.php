@@ -17,7 +17,7 @@ class Dumper
             'string' => '"'.$item.'"',
             'int', 'float' => $item,
             'null' => 'null',
-            'boolean' => $item ? 'true' : 'false',
+            'bool' => $item ? 'true' : 'false',
             'array' => static::arrayToString($item, $tab + 2),
             $item::class => "Class instance: ".$item::class,
             default => throw new InvalidArgumentException(sprintf('Use of invalid type "%s"', $item)),

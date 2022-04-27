@@ -2,30 +2,35 @@
 
 namespace PHPDoc\Internal\Parsing;
 
-class Linter
+class Linter implements LinterInterface
 {
-    public const WHITE_SPACE = [
-        '^ +',
-        'SKIP'
-    ];
+    private TokenizerInterface $tokenizer;
 
-    public const EOL = [
-        '^\n',
-        'SKIP'
-    ];
+    public function __construct(TokenizerInterface $tokenizer)
+    {
+        $this->tokenizer = $tokenizer;
+    }
 
-    public const STRING = [
-        '^\"[^\".]*\"',
-        'SKIP'
-    ];
+    public function addRule(string $name, string $regex, string $message): void
+    {
+        $this->tokenizer->addToken($name, $regex, ['message' => $message]);
+    }
 
-    public const SINGLE_LINE_HASH = [
-        '^\#.*',
-        '"#" must be replaced by "//" for Single-line comments'
-    ];
+    public function lint(string $src): array
+    {
+        $this->tokenizer->setSrc($src);
 
-    public const MULTI_LINE_FOR_SINGLE_LINE = [
-        '^\/\*(.*)\*\/',
-        'Use of multiline comments for Single-line comment is forbidden, it must be replaced by "//"'
-    ];
+        $violations = [];
+        while ($token = $this->tokenizer->getNextToken()) {
+            $violations[] = new Violation(
+                $token->getType(),
+                $token->getText(),
+                $token->getMetadata()['message'],
+                $token->getStartLine(),
+                $token->getEndLine()
+            );
+        }
+
+        return $violations;
+    }
 }

@@ -3,9 +3,7 @@
 namespace PHPDoc\Internal\Testing;
 
 use InvalidArgumentException;
-use PHPDoc\Internal\IO\Style;
 use PHPDoc\Internal\String\Dumper;
-use PHPDoc\Internal\String\Writer;
 
 class Assert implements AssertInterface
 {

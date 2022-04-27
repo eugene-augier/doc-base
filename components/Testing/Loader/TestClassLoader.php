@@ -3,17 +3,19 @@
 namespace PHPDoc\Internal\Testing\Loader;
 
 use PHPDoc\Internal\Loading\FileResolver;
+use PHPDoc\Internal\Loading\FileResolverInterface;
 use SplFileInfo;
 
-class TestClassLoader extends FileResolver implements TestLoaderInterface
+class TestClassLoader implements TestLoaderInterface
 {
+    private FileResolverInterface $resolver;
     private string $testDirName;
     private array $accepted = [];
     private array $resources = [];
 
     public function __construct(string $root, string $testDirName, string $testClassSuffix)
     {
-        parent::__construct($root);
+        $this->resolver = new FileResolver($root);
         $this->setTestDirName($testDirName);
         $this->setTestClassSuffix($testClassSuffix);
     }
@@ -34,17 +36,9 @@ class TestClassLoader extends FileResolver implements TestLoaderInterface
         $this->testDirName = '/'.trim($dir, '/').'/';
     }
 
-    /**
-     * Suffix of loaded files
-     */
-    private function setTestClassSuffix(string $testClassSuffix): void
+    public function excludes(array $excluded)
     {
-        $testClassSuffix = trim($testClassSuffix, '/');
-        if (!str_ends_with($testClassSuffix, '.php')) {
-            $testClassSuffix .= '.php';
-        }
-
-        $this->setSuffix($testClassSuffix);
+        $this->resolver->excludes($excluded);
     }
 
     /**
@@ -53,7 +47,7 @@ class TestClassLoader extends FileResolver implements TestLoaderInterface
     public function onlyIn(array $accepted): void
     {
         foreach ($accepted as $dir) {
-            $this->accepted[] = $this->root.trim($dir, '/').'/';
+            $this->accepted[] = $this->resolver->getRoot().trim($dir, '/').'/';
         }
     }
 
@@ -81,18 +75,18 @@ class TestClassLoader extends FileResolver implements TestLoaderInterface
     {
         $this->resources = [];
         if (empty($this->accepted)) {
-            $this->accepted[] = $this->root;
+            $this->accepted[] = $this->resolver->getRoot();
         }
 
         foreach ($this->accepted as $accepted) {
-            if ($this->isValidFile(new SplFileInfo($accepted))) {
+            if ($this->resolver->isValidFile(new SplFileInfo($accepted))) {
                 $this->addResource($accepted);
                 continue;
             }
 
-            $this->setRoot($accepted);
-            $this->resolve();
-            foreach ($this->getResolved() as $file) {
+            $this->resolver->setRoot($accepted);
+            $this->resolver->resolve();
+            foreach ($this->resolver->getResolved() as $file) {
                 if (!$this->isValidResource($file)) {
                     continue;
                 }
@@ -105,11 +99,21 @@ class TestClassLoader extends FileResolver implements TestLoaderInterface
     public function isValidResource(string $file): bool
     {
         $file = str_replace($this->testDirName.'..', '', $file);
-        if (!$this->isValidFile(new SplFileInfo($file))) {
+        if (!$this->resolver->isValidFile(new SplFileInfo($file))) {
             return false;
         }
 
         return str_contains($file, $this->testDirName);
+    }
+
+    private function setTestClassSuffix(string $testClassSuffix): void
+    {
+        $testClassSuffix = trim($testClassSuffix, '/');
+        if (!str_ends_with($testClassSuffix, '.php')) {
+            $testClassSuffix .= '.php';
+        }
+
+        $this->resolver->setSuffix($testClassSuffix);
     }
 
     private function addResource(string $realpath): void

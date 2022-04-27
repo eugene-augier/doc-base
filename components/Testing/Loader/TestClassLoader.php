@@ -2,32 +2,21 @@
 
 namespace PHPDoc\Internal\Testing\Loader;
 
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
+use PHPDoc\Internal\Loading\FileResolver;
 use SplFileInfo;
 
-class TestClassLoader implements TestLoaderInterface
+class TestClassLoader extends FileResolver implements TestLoaderInterface
 {
     private string $testDirName;
-    private array $excludes = [];
     private array $accepted = [];
     private array $resources = [];
-    private string $root;
-    private string $testClassSuffix;
 
     public function __construct(string $root, string $testDirName, string $testClassSuffix)
     {
+        parent::__construct($root);
         $this->setRoot($root);
         $this->setTestDirName($testDirName);
         $this->setTestClassSuffix($testClassSuffix);
-    }
-
-    /**
-     * Set root directory where files will be loaded
-     */
-    private function setRoot(string $root): void
-    {
-        $this->root = rtrim(trim($root), '/').'/';
     }
 
     /**
@@ -51,11 +40,12 @@ class TestClassLoader implements TestLoaderInterface
      */
     private function setTestClassSuffix(string $testClassSuffix): void
     {
-        $this->testClassSuffix = trim($testClassSuffix, '/');
+        $testClassSuffix = trim($testClassSuffix, '/');
         if (!str_ends_with($testClassSuffix, '.php')) {
-            $this->testClassSuffix .= '.php';
+            $testClassSuffix .= '.php';
         }
 
+        $this->setSuffix($testClassSuffix);
     }
 
     /**
@@ -74,16 +64,6 @@ class TestClassLoader implements TestLoaderInterface
     public function loadFile(string $file): void
     {
         $this->accepted = [$file];
-    }
-
-    /**
-     * All the files under these directories will be ignored
-     */
-    public function excludes(array $dirs): void
-    {
-        foreach ($dirs as $dir) {
-            $this->excludes[] = '/'.trim($dir, '/').'/';
-        }
     }
 
     /**
@@ -106,53 +86,31 @@ class TestClassLoader implements TestLoaderInterface
         }
 
         foreach ($this->accepted as $accepted) {
-            if ($this->isValidFile($accepted)) {
+            if ($this->isValidFile(new SplFileInfo($accepted))) {
                 $this->addResource($accepted);
                 continue;
             }
 
-            $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($accepted));
-            /** @var SplFileInfo $file */
-            foreach ($files as $file) {
-                if (!$this->isValidFile($file->getRealPath())) {
+            $this->setRoot($accepted);
+            $this->resolve();
+            foreach ($this->getResolved() as $file) {
+                if (!$this->isValidResource($file)) {
                     continue;
                 }
 
-                $this->addResource($file->getRealPath());
+                $this->addResource($file);
             }
         }
     }
 
-    public function isValidFile(string $file): bool
+    public function isValidResource(string $file): bool
     {
-        return file_exists($file) && $this->isValidPath($file) && $this->hasValidSuffix($file);
-    }
-
-    public function hasValidSuffix(string $file): bool
-    {
-        if (empty($this->testClassSuffix)) {
-            return true;
+        $file = str_replace($this->testDirName.'..', '', $file);
+        if (!$this->isValidFile(new SplFileInfo($file))) {
+            return false;
         }
 
-        return str_ends_with($file, $this->testClassSuffix);
-    }
-
-    public function isValidPath(string $dir): bool
-    {
-        $dir = '/'.trim($dir, '/').'/';
-
-        // important to avoid relative access to invalid directories: '/in-valid/../in-not-valid'
-        $dir = str_replace($this->testDirName.'../', '', $dir);
-        foreach ($this->excludes as $exclude) {
-            // Same but for opposite reasons
-            $dir = str_replace($exclude.'..', '', $dir);
-
-            if (str_contains($dir, $exclude)) {
-                return false;
-            }
-        }
-
-        return str_contains($dir, $this->testDirName);
+        return str_contains($file, $this->testDirName);
     }
 
     private function addResource(string $realpath): void

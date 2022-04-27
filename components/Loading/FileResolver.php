@@ -8,7 +8,7 @@ use SplFileInfo;
 
 class FileResolver implements FileResolverInterface
 {
-    private string $root;
+    protected string $root;
     private string $prefix = '';
     private string $suffix = '';
     private array $excluded = [];

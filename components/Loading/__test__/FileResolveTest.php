@@ -38,7 +38,7 @@ class FileResolveTest extends Assert
     {
         $resolver = $this->createResolver();
 
-        $resolver->excludes(['bar']);
+        $resolver->excludes(['bar', 'barr']);
         $this->assertFalse($resolver->isValidPath('foo/bar/'));
         $this->assertFalse($resolver->isValidPath('bar'));
         $this->assertFalse($resolver->isValidPath('bar'));
@@ -48,7 +48,7 @@ class FileResolveTest extends Assert
             $this->assertFalse($resolver->isValidPath($testDir));
         }
 
-        foreach (['foo/bar/..', 'foo/bar/../', 'foo/bar/../bar/../'] as $testDir) {
+        foreach (['foo/bar/..', 'foo/barr/..', 'foo/bar/../', 'foo/barr/../', 'foo/bar/../bar/../'] as $testDir) {
             $this->assertTrue($resolver->isValidPath($testDir));
         }
     }
@@ -63,6 +63,7 @@ class FileResolveTest extends Assert
     public function testDeepLoad()
     {
         $resolver = new FileResolver(self::FIXTURES.'/foo');
+        $resolver->excludes(['barr']);
         $this->assertCount(3, $resolved = $resolver->getResolved());
         $this->assertSame(self::FIXTURES.'/foo/a.php', $resolved[0]);
         $this->assertSame(self::FIXTURES.'/foo/bar/a.txt', $resolved[1]);
@@ -99,7 +100,7 @@ class FileResolveTest extends Assert
     public function testDeepExclude()
     {
         $resolver = $this->createResolver();
-        $resolver->excludes(['bar', 'baz']);
+        $resolver->excludes(['bar', 'baz', 'barr']);
 
         // To be sure that the excluded file in 'foo/bar/' exists and the test is relevant
         $this->assertTrue(file_exists(self::FIXTURES.'/foo/bar/a.txt'));

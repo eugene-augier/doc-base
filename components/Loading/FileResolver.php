@@ -115,9 +115,9 @@ class FileResolver implements FileResolverInterface
         $dir = '/'.trim($dir, '/').'/';
         foreach ($this->excluded as $exclude) {
             // important to avoid relative access to invalid directories: '/in-valid/../in-not-valid'
-            $dir = str_replace($exclude.'/..', '', $dir);
+            $dir = str_replace('/'.$exclude.'/..', '', $dir);
 
-            if (str_contains($dir, $exclude)) {
+            if (str_contains($dir, '/'.$exclude.'/')) {
                 return false;
             }
         }

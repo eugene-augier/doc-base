@@ -27,46 +27,46 @@ class TestClassLoaderTest extends Assert
         [$file, $class] = $loader->getResources()[0];
 
         $this->assertCount(1, $loader->getResources());
-        $this->assertTrue(str_ends_with($file, 'SampleTest.php'));
-        $this->assertSame($class, 'SampleTest');
+        $this->assertTrue(str_ends_with($file, 'FakeCTest.php'));
+        $this->assertSame($class, 'FakeCTest');
     }
 
     public function testOnly()
     {
         $loader = $this->createLoader();
-        $loader->loadFile(new SplFileInfo(__DIR__.'/fixtures/a/__special_test__/SampleTest.php'));
+        $loader->loadFile(new SplFileInfo(__DIR__ . '/fixtures/a/__special_test__/FakeCTest.php'));
 
         [$file, $class] = $loader->getResources()[0];
 
         $this->assertCount(1, $loader->getResources());
-        $this->assertTrue(str_ends_with($file, 'SampleTest.php'));
-        $this->assertSame($class, 'SampleTest');
+        $this->assertTrue(str_ends_with($file, 'FakeCTest.php'));
+        $this->assertSame($class, 'FakeCTest');
     }
 
     public function testFileValidity()
     {
         $loader = $this->createLoader();
-        $this->assertFalse($loader->isValidResource(new SplFileInfo(__DIR__.'/fixtures/__special_test__/FakeClassTest.ph')));
+        $this->assertFalse($loader->isValidResource(new SplFileInfo(__DIR__.'/fixtures/__special_test__/FakeCTest.ph')));
 
         $loader->excludes(['exclude']);
-        $this->assertFalse($loader->isValidResource(new SplFileInfo(__DIR__.'/fixtures/__special_test__/exclude/NeverFoundClassTest.php')));
+        $this->assertFalse($loader->isValidResource(new SplFileInfo(__DIR__ . '/fixtures/__special_test__/exclude/ExcludedTest.php')));
         $this->assertFalse($loader->isValidResource(new SplFileInfo(__DIR__.'/fixtures/a/NotIn__special_test__DirectoryTest.php')));
 
-        $this->assertTrue($loader->isValidResource(new SplFileInfo(__DIR__.'/fixtures/__special_test__/FakeClassTest.php')));
+        $this->assertTrue($loader->isValidResource(new SplFileInfo(__DIR__ . '/fixtures/__special_test__/FakeTest.php')));
     }
 
     public function testRelativeFileAccess()
     {
         $loader = $this->createLoader();
-        $this->assertTrue(file_exists($foo = __DIR__ . '/fixtures/a/__special_test__/../NotIn_test_DirectoryTest.php'));
-        $this->assertTrue(file_exists($bar = __DIR__ . '/fixtures/a/__special_test__/../__special_test__/../NotIn_test_DirectoryTest.php'));
+        $this->assertTrue(file_exists($foo = __DIR__ . '/fixtures/a/__special_test__/../NotInValidTestDirectoryTest.php'));
+        $this->assertTrue(file_exists($bar = __DIR__ . '/fixtures/a/__special_test__/../__special_test__/../NotInValidTestDirectoryTest.php'));
         $this->assertFalse($loader->isValidResource(new SplFileInfo($foo)));
         $this->assertFalse($loader->isValidResource(new SplFileInfo($bar)));
 
         $loader->excludes(['exclude']);
 
-        $this->assertTrue(file_exists($foo = __DIR__ . '/fixtures/__special_test__/exclude/../FakeClassTest.php'));
-        $this->assertTrue(file_exists($bar = __DIR__ . '/fixtures/__special_test__/exclude/../exclude/../FakeClassTest.php'));
+        $this->assertTrue(file_exists($foo = __DIR__ . '/fixtures/__special_test__/exclude/../FakeTest.php'));
+        $this->assertTrue(file_exists($bar = __DIR__ . '/fixtures/__special_test__/exclude/../exclude/../FakeTest.php'));
         $this->assertTrue($loader->isValidResource(new SplFileInfo($foo)));
         $this->assertTrue($loader->isValidResource(new SplFileInfo($bar)));
     }

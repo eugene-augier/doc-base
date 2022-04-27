@@ -55,9 +55,16 @@ if (empty($report['errors'])) {
         foreach ($error['failures'] as $failure) {
             $writer
                 ->writePair('test', $error['test'], false)
-                ->write($failure)
-                ->cr()
-            ;
+                ->writePair('file', $failure['file'])
+                ->writePair('line', $failure['line']);
+
+            if ($failure['user_message']) {
+                $writer->writePair('about', $failure['user_message']);
+            }
+
+            $writer->writePair('given', Style::error($failure['given']))
+                ->writePair($failure['reason'], Style::success($failure['expected']))
+                ->cr();
         }
     }
 

@@ -104,37 +104,29 @@ class Assert implements AssertInterface
 
         $pass
             ? $this->countPassedAssertions++
-            : $this->storeFailureMessage($expected, $given, [
+            : $this->addFailure($expected, $given, [
                 'user_message' => $message,
                 'reason' => $reason,
             ]);
     }
 
-    private function storeFailureMessage($expected, $given, array $metadata): void
+    private function addFailure($expected, $given, array $metadata): void
     {
-        $traceInfo = [];
+        $failure = [];
         foreach (debug_backtrace() as $trace) {
             if ($trace['file'] && str_contains($trace['file'], $this->validTestDir)) {
-                $traceInfo = $trace;
+                $failure['file'] = $trace['file'];
+                $failure['line'] = $trace['line'];
                 break;
             }
         }
 
-        $writer = new Writer();
-        if ($traceInfo) {
-            $writer->writePair('file', $traceInfo['file']);
-            $writer->writePair('line', $traceInfo['line']);
-        }
+        $failure['user_message'] = $metadata['user_message'] ?? '';
+        $failure['reason'] = $metadata['reason'];
+        $failure['given'] = Dumper::dump($given);
+        $failure['expected'] = Dumper::dump($expected);
 
-        if ($metadata['user_message']) {
-            $writer->writePair('about', $metadata['user_message']);
-        }
-
-        $writer->writePair('given', Style::error(Dumper::dump($given)))
-            ->writePair($metadata['reason'], Style::success(Dumper::dump($expected)))
-            ->cr();
-
-        $this->failures[] = $writer->text();
-        $this->lastFailures[] = $writer->text();
+        $this->failures[] = $failure;
+        $this->lastFailures[] = $failure;
     }
 }

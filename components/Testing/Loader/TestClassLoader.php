@@ -14,7 +14,6 @@ class TestClassLoader extends FileResolver implements TestLoaderInterface
     public function __construct(string $root, string $testDirName, string $testClassSuffix)
     {
         parent::__construct($root);
-        $this->setRoot($root);
         $this->setTestDirName($testDirName);
         $this->setTestClassSuffix($testClassSuffix);
     }

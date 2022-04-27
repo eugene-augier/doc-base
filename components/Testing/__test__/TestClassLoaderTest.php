@@ -96,9 +96,6 @@ class TestClassLoaderTest extends Assert
 
     private function createLoader(): TestClassLoader
     {
-        $loader = new TestClassLoader(__DIR__.'/fixtures', 'Test');
-        $loader->setTestDirName('__special_test__');
-
-        return $loader;
+        return new TestClassLoader(__DIR__.'/fixtures', '__special_test__', 'Test');
     }
 }

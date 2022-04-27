@@ -8,16 +8,17 @@ use SplFileInfo;
 
 class TestClassLoader implements TestLoaderInterface
 {
-    private string $testDirName = '/__test__/';
+    private string $testDirName;
     private array $excludes = [];
     private array $accepted = [];
     private array $resources = [];
     private string $root;
     private string $testClassSuffix;
 
-    public function __construct(string $root, string $testClassSuffix)
+    public function __construct(string $root, string $testDirName, string $testClassSuffix)
     {
         $this->setRoot($root);
+        $this->setTestDirName($testDirName);
         $this->setTestClassSuffix($testClassSuffix);
     }
 

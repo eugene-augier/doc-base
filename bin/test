@@ -9,7 +9,7 @@ use PHPDoc\Internal\Testing\Tester;
 
 require_once __DIR__.'/../autoloader.php';
 
-$loader = new TestClassLoader(__DIR__.'/../', 'Test');
+$loader = new TestClassLoader(__DIR__.'/../', '__test__', 'Test');
 $loader->excludes(['fixtures']);
 
 $tester = new Tester($loader);

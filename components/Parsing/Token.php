@@ -25,10 +25,9 @@ class Token
         return $this->type;
     }
 
-    public function setType(string $type): self
+    public function setType(string $type): void
     {
         $this->type = $type;
-        return $this;
     }
 
     public function getRegex(): string
@@ -36,10 +35,9 @@ class Token
         return $this->regex;
     }
 
-    public function setRegex(string $regex): self
+    public function setRegex(string $regex): void
     {
         $this->regex = $regex;
-        return $this;
     }
 
     public function getText(): string
@@ -47,10 +45,9 @@ class Token
         return $this->text;
     }
 
-    public function setText(string $text): Token
+    public function setText(string $text): void
     {
         $this->text = $text;
-        return $this;
     }
 
     public function getMetadata(): array
@@ -58,10 +55,9 @@ class Token
         return $this->metadata;
     }
 
-    public function setMetadata(array $metadata): self
+    public function setMetadata(array $metadata): void
     {
         $this->metadata = $metadata;
-        return $this;
     }
 
     public function getStartLine(): int
@@ -69,10 +65,9 @@ class Token
         return $this->startLine;
     }
 
-    public function setStartLine(int $startLine): self
+    public function setStartLine(int $startLine): void
     {
         $this->startLine = $startLine;
-        return $this;
     }
 
     public function getEndLine(): int
@@ -80,10 +75,13 @@ class Token
         return $this->endLine;
     }
 
-    public function setEndLine(int $endLine): self
+    public function setEndLine(int $endLine): void
     {
+        if ($this->endLine < $this->startLine) {
+            $endLine = $this->startLine;
+        }
+
         $this->endLine = $endLine;
-        return $this;
     }
 
     public function toSkip(): bool
@@ -91,9 +89,8 @@ class Token
         return $this->toSkip;
     }
 
-    public function setToSkip(bool $toSkip): self
+    public function setToSkip(bool $toSkip): void
     {
         $this->toSkip = $toSkip;
-        return $this;
     }
 }

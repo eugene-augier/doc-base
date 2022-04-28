@@ -7,7 +7,7 @@ use PHPDoc\Internal\String\Writer;
 use PHPDoc\Internal\Testing\Loader\TestClassLoader;
 use PHPDoc\Internal\Testing\Tester;
 
-require_once __DIR__.'/../autoloader.php';
+require_once dirname(__DIR__).'/autoloader.php';
 
 $loader = new TestClassLoader(__DIR__.'/../', '__test__', 'Test');
 $loader->excludes(['fixtures']);

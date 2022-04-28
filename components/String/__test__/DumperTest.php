@@ -20,7 +20,6 @@ class DumperTest extends Assert
 ]
 EOD, Dumper::dump([]));
 
-//        var_dump(Dumper::dump(['foo' => ['bar' => 1], true, false, null, 1.1, $this]));die;
         $this->assertSame(<<<'EOD'
 [
   foo: [

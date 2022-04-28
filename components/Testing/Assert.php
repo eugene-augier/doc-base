@@ -4,6 +4,7 @@ namespace PHPDoc\Internal\Testing;
 
 use InvalidArgumentException;
 use PHPDoc\Internal\String\Dumper;
+use ValueError;
 
 class Assert implements AssertInterface
 {
@@ -97,7 +98,7 @@ class Assert implements AssertInterface
             '===' => $expected === $given,
             '!==' => $expected !== $given,
             'instanceof' => $given instanceof $expected,
-            default => throw new InvalidArgumentException(sprintf('Operator "%s" is not a valid operator.', $operator)),
+            default => throw new ValueError(sprintf('Operator "%s" is not a valid operator.', $operator)),
         };
 
         $pass

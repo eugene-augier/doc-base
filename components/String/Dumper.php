@@ -19,7 +19,7 @@ class Dumper
             'null' => 'null',
             'bool' => $item ? 'true' : 'false',
             'array' => static::arrayToString($item, $tab + 2),
-            $item::class => "Object: ".$item::class,
+            $item::class => 'Object: '.$item::class,
             default => throw new InvalidArgumentException(sprintf('Use of invalid type "%s"', $item)),
         };
     }
@@ -29,11 +29,11 @@ class Dumper
         $str = "[\n";
         foreach ($arr as $key => $value) {
             $str .= sprintf(
-                '%s%s: %s',
+                "%s%s: %s\n",
                 str_repeat(' ', $tab),
                 $key,
                 static::toString($value, $tab + 2)
-            )."\n";
+            );
         }
 
         $tabs = str_repeat(' ', $tab - 2);

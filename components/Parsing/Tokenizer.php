@@ -12,9 +12,7 @@ class Tokenizer implements TokenizerInterface
     private int $line = 1;
     private bool $skipUnknown = true;
 
-    /**
-     * @var array<int, Token> $tokens
-     */
+    /** @var array<int, Token> $tokens */
     private array $tokens = [];
 
     public function __construct(string $src = '')
